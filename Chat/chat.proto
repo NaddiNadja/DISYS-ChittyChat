@@ -1,0 +1,39 @@
+syntax = "proto3";
+option go_package = "https://github.com/NaddiNadja/DISYS-ChittyChat;chat";
+
+package chat;
+
+service ChittyChat{
+    rpc publish(InputRequest) returns (InputReply) {}
+    rpc join(JoinRequest) returns (JoinReply){}
+    rpc getMessages(MessagesRequest) returns (MessagesReply){}
+}
+
+message InputRequest {
+    string input = 1;
+    int64 lamportTime = 2;
+}
+
+message InputReply {
+    string reply = 1;
+}
+
+message MessagesReply {
+    repeated string replies = 1;
+}
+
+message JoinReply{
+    string reply = 1;
+}
+
+message JoinRequest{}
+message MessagesRequest {}
+
+
+
+
+
+
+
+
+
