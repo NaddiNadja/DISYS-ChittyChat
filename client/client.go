@@ -1,18 +1,18 @@
 package main
 
 import (
-	"github.com/NaddiNadja/DISYS-ChittyChat/chat"
-	"fmt"
-	"io"
-	"google.golang.org/grpc"
-	"log"
+	"bufio"
 	"context"
 	"flag"
-	"bufio"
+	"fmt"
+	"io"
+	"log"
 	"os"
 	"os/signal"
-	"time"
 	"syscall"
+
+	"github.com/NaddiNadja/DISYS-ChittyChat/chat"
+	"google.golang.org/grpc"
 )
 
 var channelName = flag.String("channel", "default", "Channel name for chatting")
@@ -36,9 +36,11 @@ func main() {
 	defer conn.Close()
 
 	ctx := context.Background()
+	// ctx, cancel := context.WithCancel(context.Background())
+	// defer cancel()
 	client := chat.NewChittyChatServiceClient(conn)
 	sendMessage(ctx, client, "This user just joined.")
-	setUpClosehandler(ctx,client)
+	setUpClosehandler(ctx, client)
 
 	go joinChannel(ctx, client)
 
@@ -59,7 +61,6 @@ func joinChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
 
 	waitc := make(chan struct{})
 
-
 	go func() {
 		for {
 			in, err := stream.Recv()
@@ -71,7 +72,7 @@ func joinChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
 				log.Fatalf("Failed to receive message from channel joining. \nErr: %v", err)
 			}
 			if *senderName != in.Sender {
-				if(in.LamportTime > *lamportTime) {
+				if in.LamportTime > *lamportTime {
 					*lamportTime = in.LamportTime + 1
 				} else {
 					*lamportTime++
@@ -85,13 +86,11 @@ func joinChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
 
 func setUpClosehandler(ctx context.Context, client chat.ChittyChatServiceClient) {
 	ch := make(chan os.Signal)
-	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
 		<-ch
-		sendMessage(ctx, client, "This user left the chat.") 
-		fmt.Print("I'm dying")
-		time.Sleep(500*time.Millisecond)
-		os.Exit(0)
+		sendMessage(ctx, client, "This user left the chat.")
+		os.Exit(1)
 	}()
 }
 
@@ -105,9 +104,9 @@ func sendMessage(ctx context.Context, client chat.ChittyChatServiceClient, messa
 		Channel: &chat.Channel{
 			Name:        *channelName,
 			SendersName: *senderName},
-		Message: message,
-		Sender:  *senderName,
-		LamportTime : *lamportTime,
+		Message:     message,
+		Sender:      *senderName,
+		LamportTime: *lamportTime,
 	}
 	stream.Send(&msg)
 }
