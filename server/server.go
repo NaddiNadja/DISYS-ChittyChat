@@ -19,7 +19,10 @@ func main() {
 	chat.RegisterChittyChatServiceServer(grpcServer, &chittyChatServiceServer{
 		channel: make(map[string][]chan *chat.Message),
 	})
-	grpcServer.Serve(lis)
+	//grpcServer.Serve(lis)
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("failed to server %v", err)
+	}
 }
 
 type chittyChatServiceServer struct {
