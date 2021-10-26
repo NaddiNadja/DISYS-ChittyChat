@@ -1,0 +1,30 @@
+syntax = "proto3";
+option go_package = "https://github.com/NaddiNadja/DISYS-ChittyChat;chat";
+
+package chat;
+
+service ChittyChatService {
+    rpc JoinChannel(Channel) returns (stream Message){}
+    rpc LeaveChannel(Channel) returns (LeaveAck){}
+    rpc SendMessage(stream Message) returns (MessageAck){}
+}
+
+message Channel {
+    string name = 1;
+    string senders_name = 2;
+}
+
+message Message {
+    string sender = 1;
+    Channel channel = 2;
+    string message = 3;
+    int64 lamportTime = 4;
+}
+
+message MessageAck {
+    string messageAck = 1;
+}
+
+message LeaveAck {
+    string leaveAck = 1;
+}
