@@ -30,7 +30,7 @@ func NewServicesClient(cc grpc.ClientConnInterface) ServicesClient {
 }
 
 func (c *servicesClient) ChittyChatService(ctx context.Context, opts ...grpc.CallOption) (Services_ChittyChatServiceClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Services_ServiceDesc.Streams[0], "/Chat.Services/ChittyChatService", opts...)
+	stream, err := c.cc.NewStream(ctx, &Services_ServiceDesc.Streams[0], "/chat.Services/ChittyChatService", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (x *servicesChittyChatServiceServer) Recv() (*FromClient, error) {
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Services_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Chat.Services",
+	ServiceName: "chat.Services",
 	HandlerType: (*ServicesServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{

@@ -4,9 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
-
 	"github.com/NaddiNadja/DISYS-ChittyChat/Chat"
-
 	"google.golang.org/grpc"
 )
 

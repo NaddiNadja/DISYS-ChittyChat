@@ -10,7 +10,6 @@ import (
 	"math/rand"
 	"github.com/NaddiNadja/DISYS-ChittyChat/Chat"
 	"google.golang.org/grpc"
-	"Chat/chat"
 )
 
 type messageUnit struct {
