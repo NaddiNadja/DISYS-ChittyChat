@@ -36,8 +36,6 @@ func main() {
 	defer conn.Close()
 
 	ctx := context.Background()
-	// ctx, cancel := context.WithCancel(context.Background())
-	// defer cancel()
 	client := chat.NewChittyChatServiceClient(conn)
 	sendMessage(ctx, client, "This user just joined.")
 	setUpClosehandler(ctx, client)
