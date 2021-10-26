@@ -15,4 +15,4 @@ RUN go build ./...
 
 EXPOSE 9080
 
-ENTRYPOINT [ "/build/DISYS-ChittyChat/server/server" ]
+ENTRYPOINT [ "/server" ]
