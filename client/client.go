@@ -11,7 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/NaddiNadja/DISYS-ChittyChat/chat"
+	chat "github.com/NaddiNadja/DISYS-ChittyChat/Chat"
 	"google.golang.org/grpc"
 )
 

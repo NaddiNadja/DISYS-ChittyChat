@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/NaddiNadja/DISYS-ChittyChat/chat"
 	"io"
-	"google.golang.org/grpc"
-	"net"
 	"log"
+	"net"
+
+	chat "github.com/NaddiNadja/DISYS-ChittyChat/Chat"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -16,14 +17,14 @@ func main() {
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
 	chat.RegisterChittyChatServiceServer(grpcServer, &chittyChatServiceServer{
-		channel: make(map[string][] chan *chat.Message),
+		channel: make(map[string][]chan *chat.Message),
 	})
 	grpcServer.Serve(lis)
 }
 
 type chittyChatServiceServer struct {
-    chat.UnimplementedChittyChatServiceServer
-    channel map[string][]chan *chat.Message
+	chat.UnimplementedChittyChatServiceServer
+	channel map[string][]chan *chat.Message
 }
 
 func (s *chittyChatServiceServer) JoinChannel(ch *chat.Channel, msgStream chat.ChittyChatService_JoinChannelServer) error {
