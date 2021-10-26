@@ -8,7 +8,7 @@ RUN export GO111MODULE=on
 COPY go.mod /build
 COPY go.sum /build/
 
-RUN cd /build/ && git clone https://github.com/NaddiNadja/DISYS-ChittyChat.git
+RUN git clone https://github.com/NaddiNadja/DISYS-ChittyChat.git
 RUN cd /build/DISYS-ChittyChat/server && go build ./...
 
 EXPOSE 9080
