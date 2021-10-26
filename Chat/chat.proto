@@ -3,24 +3,28 @@ option go_package = "https://github.com/NaddiNadja/DISYS-ChittyChat;chat";
 
 package chat;
 
-message FromClient {
+service ChittyChatService {
+    rpc JoinChannel(Channel) returns (stream Message){}
+    rpc LeaveChannel(Channel) returns (LeaveAck){}
+    rpc SendMessage(stream Message) returns (MessageAck){}
+}
+
+message Channel {
     string name = 1;
-    string body = 2;
+    string senders_name = 2;
 }
 
-message FromServer {
-    string name = 1;
-    string body = 2;
+message Message {
+    string sender = 1;
+    Channel channel = 2;
+    string message = 3;
+    int64 lamportTime = 4;
 }
 
-service Services {
-    rpc ChittyChatService(stream FromClient) returns (stream FromServer){};
+message MessageAck {
+    string messageAck = 1;
 }
 
-
-
-
-
-
-
-
+message LeaveAck {
+    string leaveAck = 1;
+}
