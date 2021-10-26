@@ -9,7 +9,9 @@ COPY go.mod /build
 COPY go.sum /build/
 
 RUN cd /build/ && git clone https://github.com/NaddiNadja/DISYS-ChittyChat.git
-RUN cd /DISYS-ChittyChat/server && go build ./...
+
+WORKDIR /build/DISYS-ChittyChat/server
+RUN go build ./...
 
 EXPOSE 9080
 
