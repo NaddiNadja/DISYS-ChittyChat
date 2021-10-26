@@ -9,10 +9,8 @@ COPY go.mod /build
 COPY go.sum /build/
 
 RUN cd /build/ && git clone https://github.com/NaddiNadja/DISYS-ChittyChat.git
-
-WORKDIR /build/DISYS-ChittyChat/server
-RUN go build ./...
+RUN cd /build/DISYS-ChittyChat/server && go build ./...
 
 EXPOSE 9080
 
-ENTRYPOINT [ "/server" ]
+ENTRYPOINT [ "/build/DISYS-ChittyChat/server/server" ]
