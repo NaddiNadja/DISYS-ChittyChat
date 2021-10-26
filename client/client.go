@@ -85,9 +85,9 @@ func joinChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
 
 func setUpClosehandler(ctx context.Context, client chat.ChittyChatServiceClient) {
 	ch := make(chan os.Signal)
-	signal.Notify(ch,os.Interrupt, syscall.SIGTERM)
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 	go func() {
-		<- ch
+		<-ch
 		sendMessage(ctx, client, "This user left the chat.") 
 		fmt.Print("I'm dying")
 		time.Sleep(500*time.Millisecond)
