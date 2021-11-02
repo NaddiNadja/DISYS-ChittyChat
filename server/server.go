@@ -51,12 +51,11 @@ func (s *chittyChatServiceServer) JoinChannel(ch *chat.Channel, msgStream chat.C
 func (s *chittyChatServiceServer) LeaveChannel(ch *chat.Channel, msgStream chat.ChittyChatService_LeaveChannelServer) error {
 
 	msgChannel := make(chan *chat.Message)
-	
+
 	// doing this never closes the stream
 	for {
 		select {
 		case <-msgStream.Context().Done():
-			delete(s.rooms, ch.Name)
 			return nil
 		case msg := <-msgChannel:
 			msgStream.Send(msg)
