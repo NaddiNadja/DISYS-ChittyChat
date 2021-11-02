@@ -8,11 +8,11 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/signal"
-	"syscall"
 
 	chat "github.com/NaddiNadja/DISYS-ChittyChat/Chat"
 	"google.golang.org/grpc"
+
+	goodbye "github.com/thecodeteam/goodbye"
 )
 
 var channelName = flag.String("channel", "default", "Channel name for chatting")
@@ -24,7 +24,7 @@ func main() {
 
 	flag.Parse()
 
-	fmt.Println("--- CHITTY CHAT ---")
+	fmt.Println("--- CHITTY CHAT ---\n - CTRL + C to leave \n - All bad words allowed")
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithBlock(), grpc.WithInsecure())
 
@@ -38,9 +38,22 @@ func main() {
 	ctx := context.Background()
 	client := chat.NewChittyChatServiceClient(conn)
 	sendMessage(ctx, client, "This user just joined.")
-	setUpClosehandler(ctx, client)
+
+	defer goodbye.Exit(ctx, -1)
+	
+	goodbye.Notify(context.Background())
+
+	goodbye.RegisterWithPriority(func(ctx context.Context, sig os.Signal) {
+
+		if !goodbye.IsNormalExit(sig) {
+			sendMessage(ctx, client, "This user just left in the hardcore way")
+		} 
+
+	}, -1)
 
 	go joinChannel(ctx, client)
+	go leaveChannel(ctx, client)
+	
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
@@ -57,7 +70,7 @@ func joinChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
 		log.Fatalf("client.JoinChannel(ctx, &channel) throws: %v", err)
 	}
 
-	waitc := make(chan struct{})
+	waitc := make(chan struct{}) //go never stops with this
 
 	go func() {
 		for {
@@ -82,14 +95,37 @@ func joinChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
 	<-waitc
 }
 
-func setUpClosehandler(ctx context.Context, client chat.ChittyChatServiceClient) {
-	ch := make(chan os.Signal)
-	signal.Notify(ch, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+func leaveChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
+	
+	channel := chat.Channel{Name: *channelName, SendersName: *senderName}
+	stream, err := client.LeaveChannel(ctx, &channel)
+	if err != nil {
+		log.Fatalf("client.LeaveChannel(ctx, &channel) throws: %v", err)
+	}
+	
+	waitc := make(chan struct{})
+
 	go func() {
-		<-ch
-		sendMessage(ctx, client, "This user left the chat.")
-		os.Exit(1)
+		for {
+			in, err := stream.Recv()
+			if err == io.EOF {
+				close(waitc)
+				return
+			}
+			if err != nil {
+				log.Fatalf("Failed to receive message from leaving channel. \nErr: %v", err)
+			}
+			if *senderName != in.Sender {
+				if in.LamportTime > *lamportTime {
+					*lamportTime = in.LamportTime + 1
+				} else {
+					*lamportTime++
+				}
+				fmt.Printf("(%v) %v: %v \n", *lamportTime, in.Sender, in.Message)
+			}
+		}
 	}()
+	<-waitc
 }
 
 func sendMessage(ctx context.Context, client chat.ChittyChatServiceClient, message string) {

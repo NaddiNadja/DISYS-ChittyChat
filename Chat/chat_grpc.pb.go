@@ -19,7 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChittyChatServiceClient interface {
 	JoinChannel(ctx context.Context, in *Channel, opts ...grpc.CallOption) (ChittyChatService_JoinChannelClient, error)
-	LeaveChannel(ctx context.Context, in *Channel, opts ...grpc.CallOption) (*LeaveAck, error)
+	LeaveChannel(ctx context.Context, in *Channel, opts ...grpc.CallOption) (ChittyChatService_LeaveChannelClient, error)
 	SendMessage(ctx context.Context, opts ...grpc.CallOption) (ChittyChatService_SendMessageClient, error)
 }
 
@@ -63,17 +63,40 @@ func (x *chittyChatServiceJoinChannelClient) Recv() (*Message, error) {
 	return m, nil
 }
 
-func (c *chittyChatServiceClient) LeaveChannel(ctx context.Context, in *Channel, opts ...grpc.CallOption) (*LeaveAck, error) {
-	out := new(LeaveAck)
-	err := c.cc.Invoke(ctx, "/chat.ChittyChatService/LeaveChannel", in, out, opts...)
+func (c *chittyChatServiceClient) LeaveChannel(ctx context.Context, in *Channel, opts ...grpc.CallOption) (ChittyChatService_LeaveChannelClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ChittyChatService_ServiceDesc.Streams[1], "/chat.ChittyChatService/LeaveChannel", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &chittyChatServiceLeaveChannelClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ChittyChatService_LeaveChannelClient interface {
+	Recv() (*Message, error)
+	grpc.ClientStream
+}
+
+type chittyChatServiceLeaveChannelClient struct {
+	grpc.ClientStream
+}
+
+func (x *chittyChatServiceLeaveChannelClient) Recv() (*Message, error) {
+	m := new(Message)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *chittyChatServiceClient) SendMessage(ctx context.Context, opts ...grpc.CallOption) (ChittyChatService_SendMessageClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ChittyChatService_ServiceDesc.Streams[1], "/chat.ChittyChatService/SendMessage", opts...)
+	stream, err := c.cc.NewStream(ctx, &ChittyChatService_ServiceDesc.Streams[2], "/chat.ChittyChatService/SendMessage", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +134,7 @@ func (x *chittyChatServiceSendMessageClient) CloseAndRecv() (*MessageAck, error)
 // for forward compatibility
 type ChittyChatServiceServer interface {
 	JoinChannel(*Channel, ChittyChatService_JoinChannelServer) error
-	LeaveChannel(context.Context, *Channel) (*LeaveAck, error)
+	LeaveChannel(*Channel, ChittyChatService_LeaveChannelServer) error
 	SendMessage(ChittyChatService_SendMessageServer) error
 	mustEmbedUnimplementedChittyChatServiceServer()
 }
@@ -123,8 +146,8 @@ type UnimplementedChittyChatServiceServer struct {
 func (UnimplementedChittyChatServiceServer) JoinChannel(*Channel, ChittyChatService_JoinChannelServer) error {
 	return status.Errorf(codes.Unimplemented, "method JoinChannel not implemented")
 }
-func (UnimplementedChittyChatServiceServer) LeaveChannel(context.Context, *Channel) (*LeaveAck, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LeaveChannel not implemented")
+func (UnimplementedChittyChatServiceServer) LeaveChannel(*Channel, ChittyChatService_LeaveChannelServer) error {
+	return status.Errorf(codes.Unimplemented, "method LeaveChannel not implemented")
 }
 func (UnimplementedChittyChatServiceServer) SendMessage(ChittyChatService_SendMessageServer) error {
 	return status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
@@ -163,22 +186,25 @@ func (x *chittyChatServiceJoinChannelServer) Send(m *Message) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _ChittyChatService_LeaveChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Channel)
-	if err := dec(in); err != nil {
-		return nil, err
+func _ChittyChatService_LeaveChannel_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Channel)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(ChittyChatServiceServer).LeaveChannel(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/chat.ChittyChatService/LeaveChannel",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ChittyChatServiceServer).LeaveChannel(ctx, req.(*Channel))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(ChittyChatServiceServer).LeaveChannel(m, &chittyChatServiceLeaveChannelServer{stream})
+}
+
+type ChittyChatService_LeaveChannelServer interface {
+	Send(*Message) error
+	grpc.ServerStream
+}
+
+type chittyChatServiceLeaveChannelServer struct {
+	grpc.ServerStream
+}
+
+func (x *chittyChatServiceLeaveChannelServer) Send(m *Message) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _ChittyChatService_SendMessage_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -213,16 +239,16 @@ func (x *chittyChatServiceSendMessageServer) Recv() (*Message, error) {
 var ChittyChatService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "chat.ChittyChatService",
 	HandlerType: (*ChittyChatServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "LeaveChannel",
-			Handler:    _ChittyChatService_LeaveChannel_Handler,
-		},
-	},
+	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "JoinChannel",
 			Handler:       _ChittyChatService_JoinChannel_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "LeaveChannel",
+			Handler:       _ChittyChatService_LeaveChannel_Handler,
 			ServerStreams: true,
 		},
 		{
@@ -231,5 +257,5 @@ var ChittyChatService_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "chat/chat.proto",
+	Metadata: "Chat/chat.proto",
 }
