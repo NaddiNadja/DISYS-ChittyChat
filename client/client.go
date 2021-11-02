@@ -56,8 +56,8 @@ func main() {
 
 func joinChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
 
-	channel := chat.Channel{Name: *roomName, SendersName: *senderName}
-	stream, err := client.JoinChannel(ctx, &channel)
+	channel := chat.Room{Name: *roomName, SendersName: *senderName}
+	stream, err := client.JoinRoom(ctx, &channel)
 	if err != nil {
 		log.Fatalf("client.JoinChannel(ctx, &channel) throws: %v", err)
 	}
@@ -95,8 +95,8 @@ func joinChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
 func leaveChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
 	sendMessage(ctx, client, "just left in the hardcore way")
 	log.Println("Ses b")
-	channel := chat.Channel{Name: *roomName, SendersName: *senderName}
-	client.LeaveChannel(ctx, &channel)
+	channel := chat.Room{Name: *roomName, SendersName: *senderName}
+	client.LeaveRoom(ctx, &channel)
 }
 
 func sendMessage(ctx context.Context, client chat.ChittyChatServiceClient, message string) {
@@ -106,7 +106,7 @@ func sendMessage(ctx context.Context, client chat.ChittyChatServiceClient, messa
 		log.Printf("Cannot send message: error: %v", err)
 	}
 	msg := chat.Message{
-		Channel: &chat.Channel{
+		Room: &chat.Room{
 			Name:        *roomName,
 			SendersName: *senderName},
 		Message:     message,

@@ -30,7 +30,7 @@ type chittyChatServiceServer struct {
 	rooms map[string][]chan *chat.Message
 }
 
-func (s *chittyChatServiceServer) JoinChannel(ch *chat.Channel, msgStream chat.ChittyChatService_JoinChannelServer) error {
+func (s *chittyChatServiceServer) JoinChannel(ch *chat.Room, msgStream chat.ChittyChatService_JoinRoomServer) error {
 
 	msgChannel := make(chan *chat.Message)
 	s.rooms[ch.Name] = append(s.rooms[ch.Name], msgChannel)
@@ -48,7 +48,7 @@ func (s *chittyChatServiceServer) JoinChannel(ch *chat.Channel, msgStream chat.C
 	}
 }
 
-func (s *chittyChatServiceServer) LeaveChannel(ch *chat.Channel, msgStream chat.ChittyChatService_LeaveChannelServer) error {
+func (s *chittyChatServiceServer) LeaveChannel(ch *chat.Room, msgStream chat.ChittyChatService_LeaveRoomServer) error {
 
 	msgChannel := make(chan *chat.Message)
 
@@ -79,7 +79,7 @@ func (s *chittyChatServiceServer) SendMessage(msgStream chat.ChittyChatService_S
 	msgStream.SendAndClose(&ack)
 
 	go func() {
-		streams := s.rooms[msg.Channel.Name]
+		streams := s.rooms[msg.Room.Name]
 		for _, msgChan := range streams {
 			msgChan <- msg
 		}
