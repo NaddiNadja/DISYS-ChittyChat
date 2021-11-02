@@ -35,7 +35,7 @@ func (s *chittyChatServiceServer) JoinChannel(ch *chat.Channel, msgStream chat.C
 	msgChannel := make(chan *chat.Message)
 	s.channel[ch.Name] = append(s.channel[ch.Name], msgChannel)
 
-	log.Printf("Client joined")
+	log.Printf("Client \"%v\" joined", ch.SendersName)
 
 	// doing this never closes the stream
 	for {
@@ -59,7 +59,7 @@ func (s *chittyChatServiceServer) SendMessage(msgStream chat.ChittyChatService_S
 		return err
 	}
 
-	log.Printf("Message recieved from sender \"%v\"", msg.Sender)
+	log.Printf("Message received from sender \"%v\"", msg.Sender)
 	ack := chat.MessageAck{MessageAck: "SENT"}
 	msgStream.SendAndClose(&ack)
 
