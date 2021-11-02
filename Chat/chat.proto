@@ -5,7 +5,7 @@ package chat;
 
 service ChittyChatService {
     rpc JoinChannel(Channel) returns (stream Message){}
-    rpc LeaveChannel(Channel) returns (LeaveAck){}
+    rpc LeaveChannel(Channel) returns (stream Message){}
     rpc SendMessage(stream Message) returns (MessageAck){}
 }
 
