@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-var channelName = flag.String("channel", "default", "Channel name for chatting")
+var roomName = flag.String("room", "default", "Chat room for chatting")
 var senderName = flag.String("sender", "default", "Senders name")
 var tcpServer = flag.String("server", ":9080", "Tcp server")
 var lamportTime = flag.Int64("time", 0, "lamportTimeStamp")
@@ -51,7 +51,7 @@ func main() {
 
 func joinChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
 
-	channel := chat.Channel{Name: *channelName, SendersName: *senderName}
+	channel := chat.Channel{Name: *roomName, SendersName: *senderName}
 	stream, err := client.JoinChannel(ctx, &channel)
 	if err != nil {
 		log.Fatalf("client.JoinChannel(ctx, &channel) throws: %v", err)
@@ -100,7 +100,7 @@ func sendMessage(ctx context.Context, client chat.ChittyChatServiceClient, messa
 	}
 	msg := chat.Message{
 		Channel: &chat.Channel{
-			Name:        *channelName,
+			Name:        *roomName,
 			SendersName: *senderName},
 		Message:     message,
 		Sender:      *senderName,
