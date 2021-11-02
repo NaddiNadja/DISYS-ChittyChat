@@ -24,7 +24,7 @@ func main() {
 
 	flag.Parse()
 
-	fmt.Println("--- CHITTY CHAT ---\n - CTRL + C to leave \n - All bad words allowed")
+	fmt.Print("╒═════ CHITTY CHAT ═════╕\n│ CTRL + C to leave     │\n│ All bad words allowed │\n└───────────────────────┘\n\n")
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithBlock(), grpc.WithInsecure())
 
