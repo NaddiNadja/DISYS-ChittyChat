@@ -39,4 +39,4 @@ It is possible to create your own chat room and only chat with other people in t
 
     `$ go run client/client.go -sender {your name here}`
 
-2. Wait for others to join the same room and chat with them!.
+2. Wait for others to join the same room and chat with them!
