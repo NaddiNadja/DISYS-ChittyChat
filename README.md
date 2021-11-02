@@ -37,6 +37,6 @@ It is possible to create your own chat room and only chat with other people in t
 
 1. When joining, add `-room {name of room here}` to the command
 
-    `$ go run client/client.go -sender {your name here}`
+    `$ go run client/client.go -sender {your name here} -room {name of room here}`
 
 2. Wait for others to join the same room and chat with them!
