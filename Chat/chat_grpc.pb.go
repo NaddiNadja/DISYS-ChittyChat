@@ -18,8 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ChittyChatServiceClient interface {
-	JoinChannel(ctx context.Context, in *Channel, opts ...grpc.CallOption) (ChittyChatService_JoinChannelClient, error)
-	LeaveChannel(ctx context.Context, in *Channel, opts ...grpc.CallOption) (ChittyChatService_LeaveChannelClient, error)
+	JoinRoom(ctx context.Context, in *Room, opts ...grpc.CallOption) (ChittyChatService_JoinRoomClient, error)
+	LeaveRoom(ctx context.Context, in *Room, opts ...grpc.CallOption) (ChittyChatService_LeaveRoomClient, error)
 	SendMessage(ctx context.Context, opts ...grpc.CallOption) (ChittyChatService_SendMessageClient, error)
 }
 
@@ -31,12 +31,12 @@ func NewChittyChatServiceClient(cc grpc.ClientConnInterface) ChittyChatServiceCl
 	return &chittyChatServiceClient{cc}
 }
 
-func (c *chittyChatServiceClient) JoinChannel(ctx context.Context, in *Channel, opts ...grpc.CallOption) (ChittyChatService_JoinChannelClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ChittyChatService_ServiceDesc.Streams[0], "/chat.ChittyChatService/JoinChannel", opts...)
+func (c *chittyChatServiceClient) JoinRoom(ctx context.Context, in *Room, opts ...grpc.CallOption) (ChittyChatService_JoinRoomClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ChittyChatService_ServiceDesc.Streams[0], "/chat.ChittyChatService/JoinRoom", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &chittyChatServiceJoinChannelClient{stream}
+	x := &chittyChatServiceJoinRoomClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -46,16 +46,16 @@ func (c *chittyChatServiceClient) JoinChannel(ctx context.Context, in *Channel, 
 	return x, nil
 }
 
-type ChittyChatService_JoinChannelClient interface {
+type ChittyChatService_JoinRoomClient interface {
 	Recv() (*Message, error)
 	grpc.ClientStream
 }
 
-type chittyChatServiceJoinChannelClient struct {
+type chittyChatServiceJoinRoomClient struct {
 	grpc.ClientStream
 }
 
-func (x *chittyChatServiceJoinChannelClient) Recv() (*Message, error) {
+func (x *chittyChatServiceJoinRoomClient) Recv() (*Message, error) {
 	m := new(Message)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -63,12 +63,12 @@ func (x *chittyChatServiceJoinChannelClient) Recv() (*Message, error) {
 	return m, nil
 }
 
-func (c *chittyChatServiceClient) LeaveChannel(ctx context.Context, in *Channel, opts ...grpc.CallOption) (ChittyChatService_LeaveChannelClient, error) {
-	stream, err := c.cc.NewStream(ctx, &ChittyChatService_ServiceDesc.Streams[1], "/chat.ChittyChatService/LeaveChannel", opts...)
+func (c *chittyChatServiceClient) LeaveRoom(ctx context.Context, in *Room, opts ...grpc.CallOption) (ChittyChatService_LeaveRoomClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ChittyChatService_ServiceDesc.Streams[1], "/chat.ChittyChatService/LeaveRoom", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &chittyChatServiceLeaveChannelClient{stream}
+	x := &chittyChatServiceLeaveRoomClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -78,16 +78,16 @@ func (c *chittyChatServiceClient) LeaveChannel(ctx context.Context, in *Channel,
 	return x, nil
 }
 
-type ChittyChatService_LeaveChannelClient interface {
+type ChittyChatService_LeaveRoomClient interface {
 	Recv() (*Message, error)
 	grpc.ClientStream
 }
 
-type chittyChatServiceLeaveChannelClient struct {
+type chittyChatServiceLeaveRoomClient struct {
 	grpc.ClientStream
 }
 
-func (x *chittyChatServiceLeaveChannelClient) Recv() (*Message, error) {
+func (x *chittyChatServiceLeaveRoomClient) Recv() (*Message, error) {
 	m := new(Message)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -133,8 +133,8 @@ func (x *chittyChatServiceSendMessageClient) CloseAndRecv() (*MessageAck, error)
 // All implementations must embed UnimplementedChittyChatServiceServer
 // for forward compatibility
 type ChittyChatServiceServer interface {
-	JoinChannel(*Channel, ChittyChatService_JoinChannelServer) error
-	LeaveChannel(*Channel, ChittyChatService_LeaveChannelServer) error
+	JoinRoom(*Room, ChittyChatService_JoinRoomServer) error
+	LeaveRoom(*Room, ChittyChatService_LeaveRoomServer) error
 	SendMessage(ChittyChatService_SendMessageServer) error
 	mustEmbedUnimplementedChittyChatServiceServer()
 }
@@ -143,11 +143,11 @@ type ChittyChatServiceServer interface {
 type UnimplementedChittyChatServiceServer struct {
 }
 
-func (UnimplementedChittyChatServiceServer) JoinChannel(*Channel, ChittyChatService_JoinChannelServer) error {
-	return status.Errorf(codes.Unimplemented, "method JoinChannel not implemented")
+func (UnimplementedChittyChatServiceServer) JoinRoom(*Room, ChittyChatService_JoinRoomServer) error {
+	return status.Errorf(codes.Unimplemented, "method JoinRoom not implemented")
 }
-func (UnimplementedChittyChatServiceServer) LeaveChannel(*Channel, ChittyChatService_LeaveChannelServer) error {
-	return status.Errorf(codes.Unimplemented, "method LeaveChannel not implemented")
+func (UnimplementedChittyChatServiceServer) LeaveRoom(*Room, ChittyChatService_LeaveRoomServer) error {
+	return status.Errorf(codes.Unimplemented, "method LeaveRoom not implemented")
 }
 func (UnimplementedChittyChatServiceServer) SendMessage(ChittyChatService_SendMessageServer) error {
 	return status.Errorf(codes.Unimplemented, "method SendMessage not implemented")
@@ -165,45 +165,45 @@ func RegisterChittyChatServiceServer(s grpc.ServiceRegistrar, srv ChittyChatServ
 	s.RegisterService(&ChittyChatService_ServiceDesc, srv)
 }
 
-func _ChittyChatService_JoinChannel_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Channel)
+func _ChittyChatService_JoinRoom_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Room)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ChittyChatServiceServer).JoinChannel(m, &chittyChatServiceJoinChannelServer{stream})
+	return srv.(ChittyChatServiceServer).JoinRoom(m, &chittyChatServiceJoinRoomServer{stream})
 }
 
-type ChittyChatService_JoinChannelServer interface {
+type ChittyChatService_JoinRoomServer interface {
 	Send(*Message) error
 	grpc.ServerStream
 }
 
-type chittyChatServiceJoinChannelServer struct {
+type chittyChatServiceJoinRoomServer struct {
 	grpc.ServerStream
 }
 
-func (x *chittyChatServiceJoinChannelServer) Send(m *Message) error {
+func (x *chittyChatServiceJoinRoomServer) Send(m *Message) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _ChittyChatService_LeaveChannel_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Channel)
+func _ChittyChatService_LeaveRoom_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Room)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(ChittyChatServiceServer).LeaveChannel(m, &chittyChatServiceLeaveChannelServer{stream})
+	return srv.(ChittyChatServiceServer).LeaveRoom(m, &chittyChatServiceLeaveRoomServer{stream})
 }
 
-type ChittyChatService_LeaveChannelServer interface {
+type ChittyChatService_LeaveRoomServer interface {
 	Send(*Message) error
 	grpc.ServerStream
 }
 
-type chittyChatServiceLeaveChannelServer struct {
+type chittyChatServiceLeaveRoomServer struct {
 	grpc.ServerStream
 }
 
-func (x *chittyChatServiceLeaveChannelServer) Send(m *Message) error {
+func (x *chittyChatServiceLeaveRoomServer) Send(m *Message) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -242,13 +242,13 @@ var ChittyChatService_ServiceDesc = grpc.ServiceDesc{
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "JoinChannel",
-			Handler:       _ChittyChatService_JoinChannel_Handler,
+			StreamName:    "JoinRoom",
+			Handler:       _ChittyChatService_JoinRoom_Handler,
 			ServerStreams: true,
 		},
 		{
-			StreamName:    "LeaveChannel",
-			Handler:       _ChittyChatService_LeaveChannel_Handler,
+			StreamName:    "LeaveRoom",
+			Handler:       _ChittyChatService_LeaveRoom_Handler,
 			ServerStreams: true,
 		},
 		{

@@ -40,20 +40,19 @@ func main() {
 	sendMessage(ctx, client, "This user just joined.")
 
 	defer goodbye.Exit(ctx, -1)
-	
+
 	goodbye.Notify(context.Background())
 
 	goodbye.RegisterWithPriority(func(ctx context.Context, sig os.Signal) {
 
 		if !goodbye.IsNormalExit(sig) {
 			sendMessage(ctx, client, "This user just left in the hardcore way")
-		} 
+		}
 
 	}, -1)
 
 	go joinChannel(ctx, client)
 	go leaveChannel(ctx, client)
-	
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
@@ -64,8 +63,8 @@ func main() {
 
 func joinChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
 
-	channel := chat.Channel{Name: *roomName, SendersName: *senderName}
-	stream, err := client.JoinChannel(ctx, &channel)
+	channel := chat.Room{Name: *roomName, SendersName: *senderName}
+	stream, err := client.JoinRoom(ctx, &channel)
 	if err != nil {
 		log.Fatalf("client.JoinChannel(ctx, &channel) throws: %v", err)
 	}
@@ -97,13 +96,13 @@ func joinChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
 }
 
 func leaveChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
-	
-	channel := chat.Channel{Name: *roomName, SendersName: *senderName}
-	stream, err := client.LeaveChannel(ctx, &channel)
+
+	channel := chat.Room{Name: *roomName, SendersName: *senderName}
+	stream, err := client.LeaveRoom(ctx, &channel)
 	if err != nil {
-		log.Fatalf("client.LeaveChannel(ctx, &channel) throws: %v", err)
+		log.Fatalf("client.LeaveRoom(ctx, &channel) throws: %v", err)
 	}
-	
+
 	waitc := make(chan struct{})
 
 	go func() {
@@ -136,7 +135,7 @@ func sendMessage(ctx context.Context, client chat.ChittyChatServiceClient, messa
 		log.Printf("Cannot send message: error: %v", err)
 	}
 	msg := chat.Message{
-		Channel: &chat.Channel{
+		Room: &chat.Room{
 			Name:        *roomName,
 			SendersName: *senderName},
 		Message:     message,
