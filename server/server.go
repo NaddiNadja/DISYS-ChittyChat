@@ -30,12 +30,12 @@ type chittyChatServiceServer struct {
 	rooms map[string][]chan *chat.Message
 }
 
-func (s *chittyChatServiceServer) JoinRoom(ch *chat.Room, msgStream chat.ChittyChatService_JoinRoomServer) error {
+func (s *chittyChatServiceServer) JoinRoom(room *chat.Room, msgStream chat.ChittyChatService_JoinRoomServer) error {
 
 	msgChannel := make(chan *chat.Message)
-	s.rooms[ch.Name] = append(s.rooms[ch.Name], msgChannel)
+	s.rooms[room.Name] = append(s.rooms[room.Name], msgChannel)
 
-	log.Printf("Client \"%v\" joined", ch.SendersName)
+	log.Printf("Client \"%v\" joined room \"%v\"", room.SendersName, room.Name)
 
 	// doing this never closes the stream
 	for {
@@ -48,8 +48,8 @@ func (s *chittyChatServiceServer) JoinRoom(ch *chat.Room, msgStream chat.ChittyC
 	}
 }
 
-func (s *chittyChatServiceServer) LeaveRoom(ch *chat.Room, msgStream chat.ChittyChatService_LeaveRoomServer) error {
-	log.Printf("Client \"%v\" left", ch.SendersName)
+func (s *chittyChatServiceServer) LeaveRoom(room *chat.Room, msgStream chat.ChittyChatService_LeaveRoomServer) error {
+	log.Printf("Client \"%v\" left room \"%v\"", room.SendersName, room.Name)
 	return nil
 }
 
@@ -63,8 +63,9 @@ func (s *chittyChatServiceServer) SendMessage(msgStream chat.ChittyChatService_S
 	if err != nil {
 		return err
 	}
-
-	log.Printf("Message received from sender \"%v\"", msg.Sender)
+	if msg.Message != "This user just joined." && msg.Message != "just left in the hardcore way" {
+		log.Printf("Message received from client \"%v\"", msg.Sender)
+	}
 	ack := chat.MessageAck{MessageAck: "SENT"}
 	msgStream.SendAndClose(&ack)
 
