@@ -88,10 +88,10 @@ func joinRoom(ctx context.Context, client chat.ChittyChatServiceClient) {
 }
 
 func leaveRoom(ctx context.Context, client chat.ChittyChatServiceClient) {
-	sendMessage(ctx, client, "just left in the hardcore way")
-	log.Println("Ses b")
 	room := chat.Room{Name: *roomName, SendersName: *senderName}
 	client.LeaveRoom(ctx, &room)
+	log.Println("Ses b")
+	sendMessage(ctx, client, "just left in the hardcore way")
 }
 
 func sendMessage(ctx context.Context, client chat.ChittyChatServiceClient, message string) {
