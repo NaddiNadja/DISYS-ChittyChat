@@ -52,6 +52,8 @@ func (s *chittyChatServiceServer) LeaveRoom(ch *chat.Room, msgStream chat.Chitty
 
 	msgChannel := make(chan *chat.Message)
 
+	log.Printf("Client \"%v\" left", ch.SendersName)
+
 	// doing this never closes the stream
 	for {
 		select {
