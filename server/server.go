@@ -49,20 +49,8 @@ func (s *chittyChatServiceServer) JoinRoom(ch *chat.Room, msgStream chat.ChittyC
 }
 
 func (s *chittyChatServiceServer) LeaveRoom(ch *chat.Room, msgStream chat.ChittyChatService_LeaveRoomServer) error {
-
-	msgChannel := make(chan *chat.Message)
-
 	log.Printf("Client \"%v\" left", ch.SendersName)
-
-	// doing this never closes the stream
-	for {
-		select {
-		case <-msgStream.Context().Done():
-			return nil
-		case msg := <-msgChannel:
-			msgStream.Send(msg)
-		}
-	}
+	return nil
 }
 
 func (s *chittyChatServiceServer) SendMessage(msgStream chat.ChittyChatService_SendMessageServer) error {
@@ -82,8 +70,14 @@ func (s *chittyChatServiceServer) SendMessage(msgStream chat.ChittyChatService_S
 
 	go func() {
 		streams := s.rooms[msg.Room.Name]
-		for _, msgChan := range streams {
-			msgChan <- msg
+		for i := 0; i < len(streams); i++ {
+			select {
+			case streams[i] <- msg:
+			default:
+				streams[i] = streams[len(streams)-1]
+				streams[len(streams)-1] = nil
+				streams = streams[:len(streams)-1]
+			}
 		}
 	}()
 
