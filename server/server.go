@@ -17,7 +17,7 @@ func main() {
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
 	chat.RegisterChittyChatServiceServer(grpcServer, &chittyChatServiceServer{
-		channel: make(map[string][]chan *chat.Message),
+		channels: make(map[string][]chan *chat.Message),
 	})
 	//grpcServer.Serve(lis)
 	if err := grpcServer.Serve(lis); err != nil {
@@ -27,13 +27,13 @@ func main() {
 
 type chittyChatServiceServer struct {
 	chat.UnimplementedChittyChatServiceServer
-	channel map[string][]chan *chat.Message
+	channels map[string][]chan *chat.Message
 }
 
 func (s *chittyChatServiceServer) JoinChannel(ch *chat.Channel, msgStream chat.ChittyChatService_JoinChannelServer) error {
 
 	msgChannel := make(chan *chat.Message)
-	s.channel[ch.Name] = append(s.channel[ch.Name], msgChannel)
+	s.channels[ch.Name] = append(s.channels[ch.Name], msgChannel)
 
 	// doing this never closes the stream
 	for {
@@ -61,7 +61,7 @@ func (s *chittyChatServiceServer) SendMessage(msgStream chat.ChittyChatService_S
 	msgStream.SendAndClose(&ack)
 
 	go func() {
-		streams := s.channel[msg.Channel.Name]
+		streams := s.channels[msg.Channel.Name]
 		for _, msgChan := range streams {
 			msgChan <- msg
 		}
