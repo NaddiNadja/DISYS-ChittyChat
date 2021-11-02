@@ -56,7 +56,6 @@ func (s *chittyChatServiceServer) LeaveChannel(ch *chat.Room, msgStream chat.Chi
 	for {
 		select {
 		case <-msgStream.Context().Done():
-			delete(s.rooms, ch.Name)
 			return nil
 		case msg := <-msgChannel:
 			msgStream.Send(msg)
