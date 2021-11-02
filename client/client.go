@@ -37,7 +37,7 @@ func main() {
 
 	ctx := context.Background()
 	client := chat.NewChittyChatServiceClient(conn)
-	sendMessage(ctx, client, "This user just joined.")
+
 	setUpClosehandler(ctx, client)
 
 	go joinChannel(ctx, client)
@@ -56,6 +56,7 @@ func joinChannel(ctx context.Context, client chat.ChittyChatServiceClient) {
 	if err != nil {
 		log.Fatalf("client.JoinChannel(ctx, &channel) throws: %v", err)
 	}
+	sendMessage(ctx, client, "This user just joined.")
 
 	waitc := make(chan struct{})
 
